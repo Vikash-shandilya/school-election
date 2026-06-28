@@ -533,7 +533,7 @@ body  {
     <div class="vote-id-label">Your Vote ID</div>
     <div class="vote-id-value" id="success-vote-id">—</div>
   </div>
-  <div class="countdown-row">Returning in <span class="countdown-num" id="countdown-num">2</span>s…</div>
+  <div class="countdown-row">Returning in <span class="countdown-num" id="countdown-num">5</span>s…</div>
 </div>
 
 <!-- ── TOAST ──────────────────────────────────────────── -->
@@ -839,7 +839,7 @@ function showSuccessScreen(voteId) {
   document.getElementById('success-vote-id').textContent = voteId;
   document.getElementById('success-screen').classList.add('show');
   document.getElementById('bottom-bar').style.display = 'none';
-  let secs = 2;
+  let secs = 5;
   const tick = setInterval(() => {
     secs--;
     document.getElementById('countdown-num').textContent = secs;
