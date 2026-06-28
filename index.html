@@ -121,12 +121,10 @@ body  {
 
 /* ── GRID ────────────────────────────────────────────── */
 .candidates-grid {
-  display: grid; gap: 13px;
-  grid-template-columns: 1fr;
+  display: grid; gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  max-width: 1000px; margin: 0 auto;
 }
-@media(min-width:480px)  { .candidates-grid { grid-template-columns: repeat(2,1fr); } }
-@media(min-width:768px)  { .candidates-grid { grid-template-columns: repeat(2,1fr); gap:16px; } }
-@media(min-width:1024px) { .candidates-grid { grid-template-columns: repeat(3,1fr); } }
 
 /* ── CANDIDATE CARD ──────────────────────────────────── */
 .candidate-card {
@@ -134,10 +132,10 @@ body  {
   border-radius: var(--radius);
   border: 2px solid transparent;
   box-shadow: var(--shadow);
-  padding: 0;
+  padding: 24px 16px 20px;
   cursor: pointer;
-  display: flex; flex-direction: column; align-items: stretch; text-align: center;
-  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  position: relative; overflow: visible;
   user-select: none; -webkit-user-select: none;
   transition: transform 0.22s var(--ease), border-color 0.22s var(--ease), box-shadow 0.22s var(--ease);
 }
@@ -147,43 +145,43 @@ body  {
   border-color: var(--primary-m);
   box-shadow: 0 0 0 4px rgba(22,163,74,.15), var(--shadow-lg);
   transform: translateY(-3px);
-}
-.candidate-card.selected::after {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(to top, rgba(34,197,94,0.1) 0%, transparent 50%);
-  pointer-events: none;
+  background: linear-gradient(160deg,#f0fdf4,#fff);
 }
 
 /* check badge */
 .card-check {
   position: absolute; top: 12px; right: 12px;
-  width: 26px; height: 26px; border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.7); background: rgba(0,0,0,0.3);
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 2px solid var(--border); background: #fff;
   display: flex; align-items: center; justify-content: center;
-  transition: all 0.22s var(--ease); z-index: 10;
+  transition: all 0.22s var(--ease);
 }
-.candidate-card.selected .card-check { background: var(--primary-m); border-color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+.candidate-card.selected .card-check { background: var(--primary-m); border-color: var(--primary-m); }
 .card-check svg { opacity: 0; transition: opacity 0.15s; }
 .candidate-card.selected .card-check svg { opacity: 1; }
 
 /* photo */
 .card-photo-wrap {
   position: relative;
-  width: 100%; aspect-ratio: 4/5;
-  flex-shrink: 0;
+  width: 140px; height: 140px; border-radius: 50%;
+  border: 3px solid var(--border);
+  margin-bottom: 16px; flex-shrink: 0;
   background: var(--bg); overflow: visible;
+  transition: border-color 0.22s var(--ease);
 }
-.card-photo { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; border-radius: 0; }
+.candidate-card.selected .card-photo-wrap { border-color: var(--primary-m); }
+.card-photo { width: 100%; height: 100%; object-fit: cover; object-position: top center; border-radius: 50%; display: block; }
 .card-photo-placeholder {
   width: 100%; height: 100%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 2.5rem; font-weight: 800; color: var(--primary);
+  font-size: 2.2rem; font-weight: 800; color: var(--primary);
   background: linear-gradient(135deg, #a7f3d0, #6ee7b7);
+  border-radius: 50%;
 }
 /* logo badge */
 .card-logo-badge {
-  position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
-  width: 48px; height: 48px; border-radius: 50%;
+  position: absolute; bottom: -8px; right: -8px;
+  width: 44px; height: 44px; border-radius: 50%;
   background: #fff; border: 2px solid var(--border);
   display: flex; align-items: center; justify-content: center;
   overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,.12); z-index: 2;
@@ -192,28 +190,22 @@ body  {
 .candidate-card.selected .card-logo-badge { border-color: var(--primary-m); }
 .card-logo-img { width: 100%; height: 100%; object-fit: contain; display: block; }
 
-/* info */
-.card-info {
-  padding: 32px 16px 20px;
-  display: flex; flex-direction: column; align-items: center; flex-grow: 1;
-}
-.card-name    { font-size: 1.1rem; font-weight: 800; color: var(--text); line-height: 1.25; margin-bottom: 4px; }
-.card-meta    { font-size: 0.8rem; color: var(--muted); font-weight: 500; margin-bottom: 5px; }
-.card-tagline { font-size: 0.82rem; color: var(--primary-m); font-style: italic; line-height: 1.4; opacity: 0.85; margin-top: auto; padding-top: 8px;}
+.card-name    { font-size: 1.05rem; font-weight: 800; color: var(--text); line-height: 1.25; margin-bottom: 4px; }
+.card-meta    { font-size: 0.8rem; color: var(--muted); font-weight: 500; margin-bottom: 6px; }
+.card-tagline { font-size: 0.82rem; color: var(--primary-m); font-style: italic; line-height: 1.4; opacity: 0.85; }
 
 /* skeleton */
 .skeleton-card {
   background: var(--card); border-radius: var(--radius);
-  padding: 0;
-  display: flex; flex-direction: column; align-items: stretch;
-  min-height: 290px; overflow: hidden;
+  padding: 24px 16px 20px;
+  display: flex; flex-direction: column; align-items: center;
+  min-height: 240px; gap: 12px;
 }
 .skel { background: linear-gradient(90deg,#d1fae5 25%,#ecfdf5 50%,#d1fae5 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius: 8px; }
 @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-.skel-photo { width: 100%; aspect-ratio: 4/5; border-radius: 0; flex-shrink: 0; }
-.skel-info { padding: 32px 16px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; flex-grow: 1; }
+.skel-photo { width:140px; height:140px; border-radius:50%; }
 .skel-line   { height:12px; width:70%; }
-.skel-sm     { height:9px; width:50%; }
+.skel-sm     { height:10px; width:50%; }
 
 /* select-class prompt */
 .select-class-prompt {
@@ -667,11 +659,9 @@ function buildCard(c, cat) {
       ${photo}
       ${logoBadge}
     </div>
-    <div class="card-info">
-      <div class="card-name">${escapeHTML(c.Name)}</div>
-      <div class="card-meta">Class ${escapeHTML(c.Class)}${c.Stream ? ' · ' + escapeHTML(c.Stream) : ''}</div>
-      ${c.Tagline ? `<div class="card-tagline">"${escapeHTML(c.Tagline)}"</div>` : ''}
-    </div>
+    <div class="card-name">${escapeHTML(c.Name)}</div>
+    <div class="card-meta">Class ${escapeHTML(c.Class)}${c.Stream ? ' · ' + escapeHTML(c.Stream) : ''}</div>
+    ${c.Tagline ? `<div class="card-tagline">"${escapeHTML(c.Tagline)}"</div>` : ''}
   </div>`;
 }
 
