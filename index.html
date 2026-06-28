@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Allegiance Academy — Student Elections 2025</title>
+<meta name="description" content="Cast your vote for the Allegiance Academy Head Boy, Head Girl, Vice Head Boy and Vice Head Girl. Secure, fast and transparent school elections.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ──────────────────────────────────────────── */
+:root {
+  --primary:   #0f4c37;
+  --primary-m: #16a34a;
+  --primary-l: #4ade80;
+  --secondary: #065f46;
+  --accent:    #a7f3d0;
+  --bg:        #f0fdf4;
+  --card:      #ffffff;
+  --text:      #0f172a;
+  --muted:     #64748b;
+  --border:    #d1fae5;
+  --radius:    20px;
+  --radius-sm: 12px;
+  --radius-xs: 8px;
+  --shadow:    0 2px 8px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06);
+  --shadow-lg: 0 8px 32px rgba(15,76,55,.15);
+  --ease:      cubic-bezier(0.4,0,0.2,1);
+  --font:      'Inter', -apple-system, sans-serif;
+  --header-h:  130px;  /* rough estimate, JS will measure */
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html  { scroll-behavior: smooth; font-size: 15px; }
+body  {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ──────────────────────────────────────────── */
+.site-header {
+  position: sticky; top: 0; z-index: 200;
+  background: linear-gradient(135deg, #0f4c37 0%, #065f46 60%, #0d7a55 100%);
+  box-shadow: 0 4px 24px rgba(15,76,55,.35);
+}
+.header-inner { padding: 14px 18px 0; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.header-brand { display: flex; align-items: center; gap: 11px; }
+.logo-wrap {
+  width: 40px; height: 40px; flex-shrink: 0;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255,255,255,0.25);
+  border-radius: 11px; padding: 5px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,.2);
+}
+.logo-wrap img   { width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 6px; }
+.logo-fallback   { font-size: 22px; line-height: 1; }
+.header-title    { color: #fff; font-size: 1rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.2; }
+.header-sub      { color: rgba(255,255,255,.6); font-size: 0.65rem; margin-top: 1px; font-weight: 500; }
+.election-badge  {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 20px; padding: 5px 11px;
+  font-size: 0.65rem; font-weight: 700; color: #fff;
+  letter-spacing: 0.05em; white-space: nowrap;
+}
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: #ff5252; flex-shrink: 0; }
+.status-dot.live { background: #4ade80; animation: blink 1.4s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+/* ── CLASS SELECT ────────────────────────────────────── */
+.class-bar { padding: 0 18px 14px; }
+.class-label { font-size: 0.62rem; color: rgba(255,255,255,.65); font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 5px; }
+#class-select {
+  width: 100%; padding: 11px 40px 11px 14px;
+  background: rgba(255,255,255,.12);
+  border: 1.5px solid rgba(255,255,255,.25);
+  border-radius: var(--radius-sm);
+  color: #fff; font-size: 0.9rem; font-weight: 600;
+  font-family: var(--font);
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+  cursor: pointer; transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
+  backdrop-filter: blur(8px);
+}
+#class-select:focus { outline: none; border-color: rgba(255,255,255,.6); background-color: rgba(255,255,255,.2); }
+#class-select option { background: #065f46; color: #fff; }
+
+/* ── PROGRESS ────────────────────────────────────────── */
+.progress-wrap { padding: 0 18px 14px; }
+.progress-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.progress-label    { font-size: 0.68rem; color: rgba(255,255,255,.8); font-weight: 700; }
+.progress-fraction { font-size: 0.65rem; color: rgba(255,255,255,.55); }
+.progress-track { height: 5px; background: rgba(255,255,255,.18); border-radius: 10px; overflow: hidden; }
+.progress-fill  { height: 100%; background: #4ade80; border-radius: 10px; transition: width 0.4s var(--ease); width: 0%; box-shadow: 0 0 8px rgba(74,222,128,.6); }
+
+/* ── STAGE ───────────────────────────────────────────── */
+.stage-outer { overflow: hidden; position: relative; min-height: calc(100vh - 200px); }
+.stage { display: flex; transition: transform 0.35s var(--ease); will-change: transform; }
+.screen { min-width: 100vw; padding: 22px 16px 140px; flex-shrink: 0; }
+
+/* ── SCREEN HEADER ───────────────────────────────────── */
+.screen-header { margin-bottom: 20px; }
+.screen-step-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--primary); color: #fff;
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 4px 10px; border-radius: 20px;
+  margin-bottom: 9px;
+}
+.screen-title { font-size: 1.25rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; line-height: 1.25; }
+.screen-hint  { font-size: 0.75rem; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+
+/* ── GRID ────────────────────────────────────────────── */
+.candidates-grid {
+  display: grid; gap: 13px;
+  grid-template-columns: 1fr;
+}
+@media(min-width:480px)  { .candidates-grid { grid-template-columns: repeat(2,1fr); } }
+@media(min-width:768px)  { .candidates-grid { grid-template-columns: repeat(2,1fr); gap:16px; } }
+@media(min-width:1024px) { .candidates-grid { grid-template-columns: repeat(3,1fr); } }
+
+/* ── CANDIDATE CARD ──────────────────────────────────── */
+.candidate-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 2px solid transparent;
+  box-shadow: var(--shadow);
+  padding: 20px 16px 16px;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  position: relative; overflow: visible;
+  user-select: none; -webkit-user-select: none;
+  transition: transform 0.22s var(--ease), border-color 0.22s var(--ease), box-shadow 0.22s var(--ease);
+}
+.candidate-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.candidate-card:active { transform: scale(0.97); }
+.candidate-card.selected {
+  border-color: var(--primary-m);
+  box-shadow: 0 0 0 4px rgba(22,163,74,.15), var(--shadow-lg);
+  transform: translateY(-3px);
+  background: linear-gradient(160deg,#f0fdf4,#fff);
+}
+
+/* check badge */
+.card-check {
+  position: absolute; top: 12px; right: 12px;
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 2px solid var(--border); background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.22s var(--ease);
+}
+.candidate-card.selected .card-check { background: var(--primary-m); border-color: var(--primary-m); }
+.card-check svg { opacity: 0; transition: opacity 0.15s; }
+.candidate-card.selected .card-check svg { opacity: 1; }
+
+/* photo */
+.card-photo-wrap {
+  position: relative;
+  width: 84px; height: 84px; border-radius: 50%;
+  border: 3px solid var(--border);
+  margin-bottom: 12px; flex-shrink: 0;
+  background: var(--bg); overflow: visible;
+  transition: border-color 0.22s var(--ease);
+}
+.candidate-card.selected .card-photo-wrap { border-color: var(--primary-m); }
+.card-photo { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+.card-photo-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.9rem; font-weight: 800; color: var(--primary);
+  background: linear-gradient(135deg, #a7f3d0, #6ee7b7);
+  border-radius: 50%;
+}
+/* logo badge */
+.card-logo-badge {
+  position: absolute; bottom: -6px; right: -6px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,.12); z-index: 2;
+  transition: border-color 0.22s var(--ease);
+}
+.candidate-card.selected .card-logo-badge { border-color: var(--primary-m); }
+.card-logo-img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+.card-name    { font-size: 1rem; font-weight: 800; color: var(--text); line-height: 1.25; margin-bottom: 4px; }
+.card-meta    { font-size: 0.75rem; color: var(--muted); font-weight: 500; margin-bottom: 5px; }
+.card-tagline { font-size: 0.78rem; color: var(--primary-m); font-style: italic; line-height: 1.4; opacity: 0.85; }
+
+/* skeleton */
+.skeleton-card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 20px 16px 16px;
+  display: flex; flex-direction: column; align-items: center;
+  min-height: 185px; gap: 10px;
+}
+.skel { background: linear-gradient(90deg,#d1fae5 25%,#ecfdf5 50%,#d1fae5 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius: 8px; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.skel-circle { width:84px; height:84px; border-radius:50%; }
+.skel-line   { height:12px; width:70%; }
+.skel-sm     { height:9px; width:50%; }
+
+/* select-class prompt */
+.select-class-prompt {
+  grid-column: 1/-1;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 36px 20px; text-align: center;
+  color: var(--muted);
+}
+.select-class-prompt .prompt-icon { font-size: 2.8rem; margin-bottom: 12px; line-height: 1; }
+.select-class-prompt .prompt-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.select-class-prompt .prompt-hint  { font-size: 0.78rem; line-height: 1.5; }
+
+/* empty */
+.empty-state { grid-column:1/-1; text-align:center; padding:32px 20px; color:var(--muted); font-size:0.82rem; }
+
+/* ── REVIEW SCREEN ───────────────────────────────────── */
+.review-list { display: flex; flex-direction: column; gap: 12px; }
+.review-card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 14px 16px; box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 13px;
+  border: 1px solid var(--border);
+}
+.review-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 2px solid var(--border); flex-shrink: 0;
+  background: var(--bg); display: flex; align-items: center;
+  justify-content: center; font-size: 1.1rem; font-weight: 800; color: var(--primary);
+  position: relative; overflow: visible;
+}
+.review-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.review-logo-badge {
+  position: absolute; bottom: -4px; right: -4px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--border); overflow: hidden; z-index: 1;
+}
+.review-logo-badge img { width:100%; height:100%; object-fit:contain; }
+.review-cat  { font-size: 0.62rem; font-weight: 700; color: var(--primary-m); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
+.review-name { font-size: 0.92rem; font-weight: 700; color: var(--text); }
+.review-sub  { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+.review-edit {
+  margin-left: auto; padding: 7px 14px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--radius-xs); font-size: 0.72rem; font-weight: 700;
+  color: var(--primary); cursor: pointer; flex-shrink: 0;
+  font-family: var(--font); transition: background 0.18s, border-color 0.18s;
+  min-height: 36px; display: flex; align-items: center;
+}
+.review-edit:hover { background: var(--accent); border-color: var(--primary-m); }
+.review-class-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #fff; border-radius: var(--radius-xs);
+  padding: 8px 16px; font-size: 0.82rem; font-weight: 700;
+  margin-bottom: 18px; box-shadow: 0 3px 12px rgba(15,76,55,.25);
+}
+
+/* ── SUCCESS SCREEN ──────────────────────────────────── */
+.success-screen {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: linear-gradient(160deg,#f0fdf4,#dcfce7);
+  flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 32px 24px;
+}
+.success-screen.show { display: flex; animation: fadeIn 0.5s var(--ease); }
+@keyframes fadeIn { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+.success-ring {
+  width: 104px; height: 104px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-m), var(--primary));
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px;
+  animation: pop 0.5s var(--ease);
+  box-shadow: 0 8px 32px rgba(22,163,74,.4), 0 0 0 16px rgba(22,163,74,.08);
+}
+@keyframes pop { 0%{transform:scale(0.4);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+.success-check svg { animation: drawCheck 0.6s 0.25s var(--ease) both; }
+@keyframes drawCheck { from{stroke-dashoffset:60} to{stroke-dashoffset:0} }
+.success-title { font-size: 1.6rem; font-weight: 900; color: var(--text); margin-bottom: 9px; letter-spacing: -0.02em; }
+.success-sub   { font-size: 0.85rem; color: var(--muted); line-height: 1.6; margin-bottom: 24px; max-width: 300px; }
+.vote-id-box {
+  background: #fff; border: 2px dashed var(--primary-m);
+  border-radius: var(--radius); padding: 16px 24px;
+  margin-bottom: 24px; width: 100%; max-width: 340px;
+  box-shadow: var(--shadow);
+}
+.vote-id-label { font-size: 0.62rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 5px; }
+.vote-id-value { font-size: 0.85rem; font-weight: 700; color: var(--primary); font-family:'Courier New',monospace; word-break:break-all; }
+.countdown-row { font-size: 0.78rem; color: var(--muted); }
+.countdown-num { font-weight: 800; color: var(--primary); }
+
+/* ── BOTTOM BAR ──────────────────────────────────────── */
+.bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: linear-gradient(to top, var(--bg) 70%, transparent);
+  padding: 12px 16px 24px;
+}
+.bottom-inner { display: flex; gap: 10px; align-items: center; max-width: 700px; margin: 0 auto; }
+.back-btn {
+  width: 52px; height: 52px; flex-shrink: 0;
+  border-radius: var(--radius-sm); border: 2px solid var(--border);
+  background: var(--card); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 1.1rem; transition: background 0.18s, border-color 0.18s;
+  box-shadow: var(--shadow);
+}
+.back-btn:hover  { background: var(--accent); border-color: var(--primary-m); }
+.back-btn:active { transform: scale(0.95); }
+.back-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.next-btn {
+  flex: 1; height: 52px;
+  background: linear-gradient(135deg, var(--primary-m), var(--primary));
+  color: #fff; border: none; border-radius: var(--radius-sm);
+  font-size: 0.95rem; font-weight: 800; cursor: pointer;
+  font-family: var(--font); letter-spacing: 0.01em;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 4px 20px rgba(22,163,74,.35);
+  transition: opacity 0.18s, transform 0.18s var(--ease), box-shadow 0.18s;
+}
+.next-btn:hover  { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 28px rgba(22,163,74,.45); }
+.next-btn:active { transform: translateY(0); }
+.next-btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; transform: none; }
+
+/* ── CATEGORY LABEL ──────────────────────────────────── */
+.category-label {
+  font-size: 0.62rem; font-weight: 800; color: var(--primary-m);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin: 0 0 10px; display: flex; align-items: center; gap: 6px;
+}
+.category-label::before { content:''; display:inline-block; width:3px; height:13px; border-radius:2px; background:currentColor; }
+
+/* ── TOAST ───────────────────────────────────────────── */
+.toast {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-8px);
+  background: var(--primary); color: #fff;
+  padding: 11px 20px; border-radius: var(--radius-sm);
+  font-size: 0.82rem; font-weight: 600; font-family: var(--font);
+  z-index: 1000; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+  box-shadow: var(--shadow-lg); max-width: 90vw; text-align: center;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── ALREADY VOTED ───────────────────────────────────── */
+.voted-screen {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: linear-gradient(160deg,#f0fdf4,#dcfce7);
+  flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 32px 24px;
+}
+.voted-screen.show { display: flex; animation: fadeIn 0.5s var(--ease); }
+.voted-icon { font-size: 5rem; margin-bottom: 16px; line-height: 1; }
+.voted-title { font-size: 1.5rem; font-weight: 900; color: var(--text); margin-bottom: 8px; }
+.voted-sub   { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+
+/* ── ELECTION CLOSED ─────────────────────────────────── */
+.closed-screen {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: linear-gradient(160deg,#fff7ed,#ffedd5);
+  flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 32px 24px;
+}
+.closed-screen.show { display: flex; animation: fadeIn 0.5s var(--ease); }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────── -->
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <div class="header-top">
+      <div class="header-brand">
+        <div class="logo-wrap" id="school-logo-wrap">
+          <img src="logo.png" alt="Allegiance Academy Logo" style="width:100%;height:100%;object-fit:contain;border-radius:6px;" onerror="this.outerHTML='<span class=\'logo-fallback\'>🏛️</span>'">
+        </div>
+        <div>
+          <div class="header-title">Allegiance Academy</div>
+          <div class="header-sub">Student Elections 2025</div>
+        </div>
+      </div>
+      <div class="election-badge" id="election-badge">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="badge-text">Checking…</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="class-bar">
+    <div class="class-label">Your Class</div>
+    <select id="class-select" onchange="onClassChange()">
+      <option value="">— Select your class —</option>
+      <option value="4">Class 4</option>
+      <option value="5">Class 5</option>
+      <option value="6">Class 6</option>
+      <option value="7">Class 7</option>
+      <option value="8">Class 8</option>
+      <option value="9">Class 9</option>
+      <option value="10">Class 10</option>
+      <option value="11">Class 11</option>
+      <option value="12">Class 12</option>
+      <option value="Others">Others</option>
+    </select>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-meta">
+      <span class="progress-label" id="progress-label">Select your class to begin</span>
+      <span class="progress-fraction" id="progress-fraction"></span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+</header>
+
+<!-- ── STAGE ──────────────────────────────────────────── -->
+<div class="stage-outer" id="stage-outer">
+  <div class="stage" id="stage">
+
+    <!-- Screen 0: Head Boy -->
+    <div class="screen" id="screen-0">
+      <div class="screen-header">
+        <div class="screen-step-tag">Step 1 of 4</div>
+        <div class="screen-title">Head Boy</div>
+        <div class="screen-hint">Choose one candidate you believe will best represent the school as Head Boy.</div>
+      </div>
+      <div class="candidates-grid" id="grid-hb"></div>
+    </div>
+
+    <!-- Screen 1: Head Girl -->
+    <div class="screen" id="screen-1">
+      <div class="screen-header">
+        <div class="screen-step-tag">Step 2 of 4</div>
+        <div class="screen-title">Head Girl</div>
+        <div class="screen-hint">Choose one candidate you believe will best represent the school as Head Girl.</div>
+      </div>
+      <div class="candidates-grid" id="grid-hg"></div>
+    </div>
+
+    <!-- Screen 2: Vice Head Boy -->
+    <div class="screen" id="screen-2">
+      <div class="screen-header">
+        <div class="screen-step-tag">Step 3 of 4</div>
+        <div class="screen-title">Vice Head Boy</div>
+        <div class="screen-hint">Choose one candidate for Vice Head Boy.</div>
+      </div>
+      <div class="candidates-grid" id="grid-vhb"></div>
+    </div>
+
+    <!-- Screen 3: Vice Head Girl -->
+    <div class="screen" id="screen-3">
+      <div class="screen-header">
+        <div class="screen-step-tag">Step 4 of 4</div>
+        <div class="screen-title">Vice Head Girl</div>
+        <div class="screen-hint">Choose one candidate for Vice Head Girl.</div>
+      </div>
+      <div class="candidates-grid" id="grid-vhg"></div>
+    </div>
+
+    <!-- Screen 4: Review -->
+    <div class="screen" id="screen-4">
+      <div class="screen-header">
+        <div class="screen-step-tag">Review &amp; Submit</div>
+        <div class="screen-title">Confirm Your Votes</div>
+        <div class="screen-hint">Review your choices carefully. You cannot change your vote after submitting.</div>
+      </div>
+      <div id="review-class-row"></div>
+      <div class="review-list" id="review-list"></div>
+    </div>
+
+  </div><!-- end stage -->
+</div><!-- end stage-outer -->
+
+<!-- ── BOTTOM BAR ─────────────────────────────────────── -->
+<div class="bottom-bar" id="bottom-bar">
+  <div class="bottom-inner">
+    <button class="back-btn" id="back-btn" onclick="goBack()" title="Go back" disabled>◀</button>
+    <button class="next-btn" id="next-btn" onclick="goNext()" disabled>
+      <span id="next-btn-text">Select your class first</span>
+      <span id="next-btn-arrow">→</span>
+    </button>
+  </div>
+</div>
+
+<!-- ── VOTED OVERLAY ──────────────────────────────────── -->
+<div class="voted-screen" id="voted-screen">
+  <div class="voted-icon">🗳️</div>
+  <div class="voted-title">Vote Recorded!</div>
+  <div class="voted-sub" id="voted-sub">A vote has already been submitted from this device.<br>If you are a <strong>different student</strong>, click below.</div>
+  <button onclick="nextStudent()" style="
+    margin-top: 24px;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: var(--font);
+    box-shadow: 0 4px 20px rgba(22,163,74,.35);
+    letter-spacing: 0.01em;
+  ">👤 I'm a Different Student →</button>
+</div>
+
+<!-- ── CLOSED OVERLAY ─────────────────────────────────── -->
+<div class="closed-screen" id="closed-screen">
+  <div class="voted-icon">🔒</div>
+  <div class="voted-title" style="color:#92400e">Election Closed</div>
+  <div class="voted-sub" style="color:#b45309">Voting is not currently open. Please check back later or contact your teacher.</div>
+</div>
+
+<!-- ── SUCCESS OVERLAY ────────────────────────────────── -->
+<div class="success-screen" id="success-screen">
+  <div class="success-ring">
+    <div class="success-check">
+      <svg width="50" height="50" viewBox="0 0 50 50" fill="none">
+        <path d="M12 26l9 9 17-18" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"
+              stroke-dasharray="60" stroke-dashoffset="60"/>
+      </svg>
+    </div>
+  </div>
+  <div class="success-title">Vote Cast! 🎉</div>
+  <div class="success-sub">Your vote has been securely recorded. Thank you for participating in the Allegiance Academy Elections 2025!</div>
+  <div class="vote-id-box">
+    <div class="vote-id-label">Your Vote ID</div>
+    <div class="vote-id-value" id="success-vote-id">—</div>
+  </div>
+  <div class="countdown-row">Returning in <span class="countdown-num" id="countdown-num">2</span>s…</div>
+</div>
+
+<!-- ── TOAST ──────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+//  CONFIG
+// ============================================================
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbUg-8jRk7wWsSPNq6frZ1lAEcqK59eGYnpMM9st2wf0ZqWkDzkPv6-TxrXB8qS-HzBg/exec';
+
+// ============================================================
+//  CONSTANTS
+// ============================================================
+const CATEGORIES = ['Head Boy', 'Head Girl', 'Vice Head Boy', 'Vice Head Girl'];
+const GRID_IDS   = ['grid-hb', 'grid-hg', 'grid-vhb', 'grid-vhg'];
+const TOTAL_VOTING_SCREENS = 4; // screens 0-3 are voting, 4 is review
+
+// ============================================================
+//  STATE
+// ============================================================
+let candidates    = [];        // all active candidates from API
+let votes         = {};        // { 'Head Boy': candidateId, ... }
+let currentScreen = 0;
+let selectedClass = '';
+let electionActive = false;
+let hasVotedKey   = 'aa_voted_2025';
+
+// ============================================================
+//  BOOT
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  // Check already voted
+  if (localStorage.getItem(hasVotedKey)) {
+    showVotedScreen();
+    return;
+  }
+  loadInitialData();
+});
+
+async function loadInitialData() {
+  try {
+    const res = await apiFetch('getResults', {});
+    if (!res) return;
+    electionActive = !!res.electionActive;
+    updateBadge(electionActive);
+    if (!electionActive) { showClosedScreen(); return; }
+  } catch(e) { /* optimistic — continue */ }
+
+  try {
+    const res2 = await apiFetch('getCandidates', {});
+    if (res2 && res2.candidates) {
+      candidates = res2.candidates.filter(c => c.Status === 'Active');
+    }
+  } catch(e) { showToast('Could not load candidates'); }
+
+  renderAllGrids();
+}
+
+function updateBadge(active) {
+  const dot  = document.getElementById('status-dot');
+  const text = document.getElementById('badge-text');
+  if (active) { dot.className = 'status-dot live'; text.textContent = 'Election Live'; }
+  else        { dot.className = 'status-dot'; text.textContent = 'Election Closed'; }
+}
+
+// ============================================================
+//  CLASS CHANGE
+// ============================================================
+function onClassChange() {
+  selectedClass = document.getElementById('class-select').value;
+  // Reveal candidates now that a class is chosen
+  renderAllGrids();
+  updateProgress();
+  updateBottomBar();
+}
+
+// ============================================================
+//  RENDER GRIDS
+// ============================================================
+function renderAllGrids() {
+  CATEGORIES.forEach((cat, idx) => {
+    const grid = document.getElementById(GRID_IDS[idx]);
+    if (!grid) return;
+
+    // Show prompt if no class selected yet
+    if (!selectedClass) {
+      grid.innerHTML = `
+        <div class="select-class-prompt">
+          <div class="prompt-icon">🏫</div>
+          <div class="prompt-title">Select your class first</div>
+          <div class="prompt-hint">Choose your class from the dropdown above<br>to see the candidates.</div>
+        </div>`;
+      return;
+    }
+
+    const catCandidates = candidates.filter(c => c.Category === cat);
+    if (!catCandidates.length) {
+      grid.innerHTML = `<div class="empty-state">No candidates listed for ${escapeHTML(cat)} yet.</div>`;
+      return;
+    }
+    grid.innerHTML = catCandidates.map(c => buildCard(c, cat)).join('');
+  });
+}
+
+function buildCard(c, cat) {
+  const initials = c.Name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const photo = c.Image_URL
+    ? `<img class="card-photo" src="${escapeAttr(c.Image_URL)}" loading="lazy" onerror="this.outerHTML='<div class=\\'card-photo-placeholder\\'>${initials}</div>'">`
+    : `<div class="card-photo-placeholder">${initials}</div>`;
+  const logoBadge = c.Logo_URL
+    ? `<div class="card-logo-badge"><img class="card-logo-img" src="${escapeAttr(c.Logo_URL)}" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`
+    : '';
+  return `<div class="candidate-card" id="card-${escapeAttr(c.Candidate_ID)}" 
+              data-id="${escapeAttr(c.Candidate_ID)}" data-cat="${escapeAttr(cat)}"
+              onclick="selectCandidate('${escapeAttr(c.Candidate_ID)}','${escapeAttr(cat)}',this)">
+    <div class="card-check">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+        <path d="M2.5 6.5l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="card-photo-wrap">
+      ${photo}
+      ${logoBadge}
+    </div>
+    <div class="card-name">${escapeHTML(c.Name)}</div>
+    <div class="card-meta">Class ${escapeHTML(c.Class)}${c.Stream ? ' · ' + escapeHTML(c.Stream) : ''}</div>
+    ${c.Tagline ? `<div class="card-tagline">"${escapeHTML(c.Tagline)}"</div>` : ''}
+  </div>`;
+}
+
+// ============================================================
+//  SELECTION
+// ============================================================
+function selectCandidate(id, cat, el) {
+  // Deselect all in this category
+  const catIdx = CATEGORIES.indexOf(cat);
+  const grid   = document.getElementById(GRID_IDS[catIdx]);
+  if (!grid) return;
+  grid.querySelectorAll('.candidate-card').forEach(c => c.classList.remove('selected'));
+  // Select this
+  el.classList.add('selected');
+  votes[cat] = id;
+  updateBottomBar();
+}
+
+// ============================================================
+//  NAVIGATION
+// ============================================================
+function goNext() {
+  if (currentScreen === 0 && !selectedClass) {
+    showToast('Please select your class first'); return;
+  }
+  const cat = CATEGORIES[currentScreen];
+  if (currentScreen < TOTAL_VOTING_SCREENS && !votes[cat]) {
+    showToast('Please choose a candidate to continue'); return;
+  }
+  if (currentScreen === TOTAL_VOTING_SCREENS) {
+    submitVote(); return;
+  }
+  currentScreen++;
+  slideToScreen(currentScreen);
+  updateProgress();
+  updateBottomBar();
+}
+
+function goBack() {
+  if (currentScreen > 0) {
+    currentScreen--;
+    slideToScreen(currentScreen);
+    updateProgress();
+    updateBottomBar();
+  }
+}
+
+function jumpToScreen(n) {
+  currentScreen = n;
+  slideToScreen(n);
+  updateProgress();
+  updateBottomBar();
+}
+
+function slideToScreen(n) {
+  document.getElementById('stage').style.transform = `translateX(-${n * 100}vw)`;
+  if (n === TOTAL_VOTING_SCREENS) renderReview();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+//  REVIEW
+// ============================================================
+function renderReview() {
+  // Class chip
+  const chip = document.getElementById('review-class-row');
+  chip.innerHTML = `<div class="review-class-chip">🏫 Class ${escapeHTML(selectedClass)}</div>`;
+
+  const list = document.getElementById('review-list');
+  list.innerHTML = CATEGORIES.map((cat, idx) => {
+    const cid  = votes[cat];
+    const cand = candidates.find(x => x.Candidate_ID === cid);
+    if (!cand) return '';
+    const initials = cand.Name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const avatar = cand.Image_URL
+      ? `<img src="${escapeAttr(cand.Image_URL)}" onerror="this.outerHTML='${initials}'">`
+      : initials;
+    const logoBadge = cand.Logo_URL
+      ? `<div class="review-logo-badge"><img src="${escapeAttr(cand.Logo_URL)}" onerror="this.parentElement.style.display='none'"></div>`
+      : '';
+    return `<div class="review-card">
+      <div class="review-avatar">${avatar}${logoBadge}</div>
+      <div>
+        <div class="review-cat">${escapeHTML(cat)}</div>
+        <div class="review-name">${escapeHTML(cand.Name)}</div>
+        <div class="review-sub">Class ${escapeHTML(cand.Class)}${cand.Stream ? ' · ' + escapeHTML(cand.Stream) : ''}</div>
+      </div>
+      <button class="review-edit" onclick="jumpToScreen(${idx})">Change</button>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+//  SUBMIT
+// ============================================================
+async function submitVote() {
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.disabled = true;
+  nextBtn.querySelector('#next-btn-text').textContent = 'Submitting…';
+
+  const payload = {
+    class:       selectedClass,
+    headBoy:     votes['Head Boy'],
+    headGirl:    votes['Head Girl'],
+    viceHeadBoy: votes['Vice Head Boy'],
+    viceHeadGirl:votes['Vice Head Girl'],
+  };
+
+  try {
+    const res = await apiFetch('submitVote', payload);
+    if (res && res.success) {
+      localStorage.setItem(hasVotedKey, '1');
+      showSuccessScreen(res.voteId || 'AA-' + Date.now());
+    } else {
+      showToast(res && res.error ? res.error : 'Submission failed. Try again.');
+      nextBtn.disabled = false;
+      nextBtn.querySelector('#next-btn-text').textContent = 'Submit Vote';
+    }
+  } catch(e) {
+    showToast('Network error. Please try again.');
+    nextBtn.disabled = false;
+    nextBtn.querySelector('#next-btn-text').textContent = 'Submit Vote';
+  }
+}
+
+// ============================================================
+//  PROGRESS & BOTTOM BAR
+// ============================================================
+function updateProgress() {
+  const totalSteps = TOTAL_VOTING_SCREENS + 1; // 4 voting + 1 review
+  const fill  = document.getElementById('progress-fill');
+  const label = document.getElementById('progress-label');
+  const frac  = document.getElementById('progress-fraction');
+
+  const stepLabels = ['Head Boy', 'Head Girl', 'Vice Head Boy', 'Vice Head Girl', 'Review'];
+  const pct = currentScreen === 0 && !selectedClass ? 0 : Math.round(((currentScreen) / TOTAL_VOTING_SCREENS) * 100);
+  fill.style.width = pct + '%';
+  label.textContent = currentScreen < TOTAL_VOTING_SCREENS ? 'Voting: ' + stepLabels[currentScreen] : 'Review & Submit';
+  frac.textContent  = currentScreen < TOTAL_VOTING_SCREENS ? `Step ${currentScreen+1} of ${TOTAL_VOTING_SCREENS}` : '';
+}
+
+function updateBottomBar() {
+  const nextBtn  = document.getElementById('next-btn');
+  const backBtn  = document.getElementById('back-btn');
+  const textEl   = document.getElementById('next-btn-text');
+  const arrowEl  = document.getElementById('next-btn-arrow');
+
+  backBtn.disabled = currentScreen === 0;
+
+  if (!selectedClass) {
+    nextBtn.disabled = true;
+    textEl.textContent = 'Select your class first';
+    arrowEl.textContent = '';
+    return;
+  }
+
+  if (currentScreen === TOTAL_VOTING_SCREENS) {
+    nextBtn.disabled = false;
+    textEl.textContent = 'Submit My Vote';
+    arrowEl.textContent = '✓';
+    return;
+  }
+
+  const cat = CATEGORIES[currentScreen];
+  const hasVote = !!votes[cat];
+  nextBtn.disabled = !hasVote;
+  textEl.textContent = hasVote ? 'Next' : 'Choose a candidate';
+  arrowEl.textContent = hasVote ? '→' : '';
+}
+
+// ============================================================
+//  OVERLAYS
+// ============================================================
+function showSuccessScreen(voteId) {
+  document.getElementById('success-vote-id').textContent = voteId;
+  document.getElementById('success-screen').classList.add('show');
+  document.getElementById('bottom-bar').style.display = 'none';
+  let secs = 2;
+  const tick = setInterval(() => {
+    secs--;
+    document.getElementById('countdown-num').textContent = secs;
+    if (secs <= 0) { clearInterval(tick); resetPage(); }
+  }, 1000);
+}
+
+function showVotedScreen()  { document.getElementById('voted-screen').classList.add('show'); document.getElementById('bottom-bar').style.display = 'none'; }
+function showClosedScreen() { document.getElementById('closed-screen').classList.add('show'); document.getElementById('bottom-bar').style.display = 'none'; }
+
+function resetPage() {
+  // Clear voted flag so next student on this shared laptop can vote
+  localStorage.removeItem(hasVotedKey);
+  document.getElementById('success-screen').classList.remove('show');
+  document.getElementById('bottom-bar').style.display = 'block';
+  currentScreen = 0;
+  votes = {};
+  selectedClass = '';
+  document.getElementById('class-select').value = '';
+  document.querySelectorAll('.candidate-card').forEach(c => c.classList.remove('selected'));
+  slideToScreen(0);
+  updateProgress();
+  updateBottomBar();
+}
+
+function nextStudent() {
+  localStorage.removeItem(hasVotedKey);
+  document.getElementById('voted-screen').classList.remove('show');
+  document.getElementById('bottom-bar').style.display = 'block';
+  currentScreen = 0;
+  votes = {};
+  selectedClass = '';
+  document.getElementById('class-select').value = '';
+  document.querySelectorAll('.candidate-card').forEach(c => c.classList.remove('selected'));
+  slideToScreen(0);
+  updateProgress();
+  updateBottomBar();
+}
+
+// ============================================================
+//  API
+// ============================================================
+async function apiFetch(action, params) {
+  const url = new URL(SCRIPT_URL);
+  url.searchParams.set('action', action);
+  if (params && Object.keys(params).length > 0)
+    url.searchParams.set('payload', JSON.stringify(params));
+  const res  = await fetch(url.toString(), { method: 'GET', redirect: 'follow' });
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch(e) { throw new Error('Bad response: ' + text.slice(0,80)); }
+}
+
+// ============================================================
+//  HELPERS
+// ============================================================
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+function escapeHTML(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escapeAttr(s) { return escapeHTML(s); }
+</script>
+</body>
+</html>
